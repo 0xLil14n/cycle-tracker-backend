@@ -1,0 +1,12 @@
+[package]
+name = "cycle-tracker-backend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "4"
+postgres = "0.19"
+tokio = { version = "1.22.0", features = ["full"] }
+tokio-postgres = "0.7.7"
