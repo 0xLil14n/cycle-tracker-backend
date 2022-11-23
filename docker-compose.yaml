@@ -3,8 +3,9 @@ services:
   postgres:
     image: postgres:14
     environment:
-      - POSTGRES_USER=dboperator
+      - POSTGRES_USER=lilian
       - POSTGRES_PASSWORD=operatorpass123
       - POSTGRES_DB=postgres
+      - POSTGRES_HOST=localhost
     ports:
       - '5243:5432'
