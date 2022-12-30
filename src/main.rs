@@ -12,6 +12,7 @@ async fn cycle(path: web::Path<u32>)-> impl Responder {
 
     HttpResponse::Ok().body(format!("cycle: {}", user_id))
 }
+
 #[post("/echo")]
 async fn echo(req_body: String) -> impl Responder {
     HttpResponse::Ok().body(req_body)
