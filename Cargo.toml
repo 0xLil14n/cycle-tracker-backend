@@ -9,6 +9,7 @@ edition = "2021"
 actix-web = "4"
 deadpool-postgres = "0.10.3"
 postgres = "0.19"
+serde =  {version = "1", features=["derive"]}
 tokio = { version = "1.22.0", features = ["full"] }
 tokio-postgres = "0.7.7"
 tokio-postgres-migration = "0.1.0"
