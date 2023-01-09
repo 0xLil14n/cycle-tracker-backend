@@ -1,8 +1,15 @@
-use actix_web::{get, post, web::{self, Data}, App, HttpResponse, HttpServer, Responder};
-use serde::{Serialize, Deserialize};
+use std::time::{Instant, SystemTime};
+
+use actix_web::{
+    get, post,
+    web::{self, Data},
+    App, HttpResponse, HttpServer, Responder,
+};
 use db::to_pool;
-use deadpool_postgres::{Pool, Manager, Client};
+use deadpool_postgres::{Client, Manager, Pool};
+use serde::{Deserialize, Serialize};
 mod db;
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 
 #[get("/")]
 async fn hello() -> impl Responder {
@@ -10,7 +17,7 @@ async fn hello() -> impl Responder {
 }
 
 #[get("/cycle/{user_id}")]
-async fn cycle(path: web::Path<u32>)-> impl Responder {
+async fn cycle(path: web::Path<u32>) -> impl Responder {
     let user_id = path.into_inner();
 
     HttpResponse::Ok().body(format!("cycle: {}", user_id))
@@ -22,23 +29,35 @@ async fn echo(req_body: String) -> impl Responder {
 }
 
 #[derive(Deserialize, Serialize)]
+
 struct Event {
-    user_id: u32,
-    date: String,
+    user_id: i32,
+    date: i64,
 }
+
 
 #[post("/cycle/period")]
 async fn log_period(req_body: web::Json<Event>, pool: Data<Pool>) -> impl Responder {
     let user_id = req_body.user_id;
+    let date = &req_body.date;
     let client: Client = pool.get().await.unwrap();
-    // let res: String = client
-    //     .query("INSERT INTO events $1::TEXT", &[&"this is coming from the db"])
-    //     .await
-    //     .unwrap()
-    //     .first()
-    //     .unwrap().get(0);
-    let res: String = format!("updated for {}", user_id);
-    HttpResponse::Ok().body(res)
+
+    let res = client
+        .query(
+            "INSERT INTO cycle (user_id, start_date) VALUES ($1, $2)",
+            &[
+                &user_id,
+                &NaiveDateTime::from_timestamp_opt(*date, 0).expect("fuckkkk"),
+            ],
+        )
+        .await;
+        
+    
+    dbg!(&res);
+    match &res {
+        Ok(_) => HttpResponse::Ok().body("success"),
+        Err(e) => HttpResponse::Ok().body(format!("error: {}", e))
+    }
 }
 
 #[get("/test-db")]
@@ -49,7 +68,8 @@ async fn test_db(req_body: String, pool: Data<Pool>) -> impl Responder {
         .await
         .unwrap()
         .first()
-        .unwrap().get(0);
+        .unwrap()
+        .get(0);
 
     HttpResponse::Ok().body(res)
 }
@@ -61,9 +81,9 @@ async fn manual_hello() -> impl Responder {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     let pool = to_pool();
-    
+
     // db::migrate_up().await;
-    
+
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(pool.clone()))

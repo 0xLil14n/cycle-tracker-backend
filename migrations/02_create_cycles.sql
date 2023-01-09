@@ -1,7 +1,13 @@
 CREATE TABLE IF NOT EXISTS cycle (
     id SERIAL PRIMARY KEY,
-    userId int NOT NULL,
-    startDate timestamp DEFAULT current_timestamp NOT NULL
+    user_id int NOT NULL,
+    start_date timestamp NOT NULL,
+    end_date timestamp,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+ALTER TABLE cycle ADD FOREIGN KEY user_id
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY
 );
 
 CREATE TABLE IF NOT EXISTS events (
@@ -23,3 +29,4 @@ CREATE TABLE IF NOT EXISTS event_queue (
 --     SymptomLogged -> stream_id = cycle
 --     FactorLogged -> stream_id = cycle
 -- }
+-- 2023-01-31T06:22:00Z

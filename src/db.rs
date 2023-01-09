@@ -1,18 +1,21 @@
-
 use std::error::Error;
 
 use tokio_postgres_migration::Migration;
 // use tokio_postgres::{Config,NoTls, Error};
+use deadpool_postgres::{Config, Manager, ManagerConfig, Pool, RecyclingMethod, Runtime};
 use tokio_postgres::NoTls;
-use deadpool_postgres::{Config, Pool,Runtime,Manager, ManagerConfig, RecyclingMethod};
-
-
 
 const SCRIPTS_UP: [(&str, &str); 2] = [
-    ("01_create_users",include_str!("../migrations/01_create_users.sql")),
-    ("02_create_cycles",include_str!("../migrations/02_create_cycles.sql")),
- ];
-    
+    (
+        "01_create_users",
+        include_str!("../migrations/01_create_users.sql"),
+    ),
+    (
+        "02_create_cycles",
+        include_str!("../migrations/02_create_cycles.sql"),
+    ),
+];
+
 // pub async fn get_client() -> tokio_postgres::Client  {
 //     let mut c = Config::new();
 //     c.host("localhost");
@@ -21,7 +24,6 @@ const SCRIPTS_UP: [(&str, &str); 2] = [
 //     c.dbname("postgres");
 //     c.port(5432 as u16);
 
-    
 //     let (client, connection) = c.connect(NoTls).await.unwrap();
 //     tokio::spawn(connection);
 //     client
@@ -33,9 +35,9 @@ pub fn to_pool() -> Pool {
     c.password("operatorpass123");
     c.user("lilian");
     c.dbname("postgres");
-    c.port(5432 as u16);    
+    c.port(5432 as u16);
     let mgr_config = ManagerConfig {
-        recycling_method: RecyclingMethod::Fast
+        recycling_method: RecyclingMethod::Fast,
     };
     let mgr = Manager::from_config(c, NoTls, mgr_config);
     let pool = Pool::builder(mgr).max_size(16).build().unwrap();
